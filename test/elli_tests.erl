@@ -146,7 +146,7 @@ accessors_test_() ->
 hello_world() ->
     Response = hackney:get("http://localhost:3001/hello/world"),
     ?assertMatch(200, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"12">>}], headers(Response)),
     ?assertMatch(<<"Hello World!">>, body(Response)),
     %% sizes
@@ -202,7 +202,7 @@ keep_alive_timings() ->
 
 keep_alive_timings(Status, Headers, HCRef) ->
     ?assertMatch(200, Status),
-    ?assertMatch([{<<"Connection">>,<<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>,<<"keep-alive">>},
                   {<<"Content-Length">>,<<"12">>}], Headers),
     ?assertMatch({ok, <<"Hello World!">>}, hackney:body(HCRef)),
     %% sizes
@@ -229,14 +229,14 @@ keep_alive_timings(Status, Headers, HCRef) ->
 not_found() ->
     Response = hackney:get("http://localhost:3001/foobarbaz"),
     ?assertMatch(404, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"9">>}], headers(Response)),
     ?assertMatch(<<"Not Found">>, body(Response)).
 
 crash() ->
     Response = hackney:get("http://localhost:3001/crash"),
     ?assertMatch(500, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"21">>}], headers(Response)),
     ?assertMatch(<<"Internal server error">>, body(Response)).
 
@@ -244,14 +244,14 @@ invalid_return() ->
     %% Elli should return 500 for handlers returning bogus responses.
     Response = hackney:get("http://localhost:3001/invalid_return"),
     ?assertMatch(500, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"21">>}], headers(Response)),
     ?assertMatch(<<"Internal server error">>, body(Response)).
 
 no_compress() ->
     Response = hackney:get("http://localhost:3001/compressed"),
     ?assertMatch(200, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"1032">>}], headers(Response)),
     ?assertEqual(binary:copy(<<"Hello World!">>, 86),
                  body(Response)).
@@ -260,7 +260,7 @@ compress(Encoding, Length) ->
     Response = hackney:get("http://localhost:3001/compressed",
                            [{<<"Accept-Encoding">>, Encoding}]),
     ?assertMatch(200, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Encoding">>, Encoding},
                   {<<"Content-Length">>, Length}], headers(Response)),
     ?assertEqual(binary:copy(<<"Hello World!">>, 86),
@@ -276,7 +276,7 @@ deflate() -> compress(<<"deflate">>, <<"29">>).
 exception_flow() ->
     Response = hackney:get("http://localhost:3001/403"),
     ?assertMatch(403, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"9">>}], headers(Response)),
     ?assertMatch(<<"Forbidden">>, body(Response)).
 
@@ -329,7 +329,7 @@ post_args() ->
 shorthand() ->
     Response = hackney:get("http://localhost:3001/shorthand"),
     ?assertMatch(200, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"5">>}], headers(Response)),
     ?assertMatch(<<"hello">>, body(Response)).
 
@@ -341,7 +341,7 @@ ip() ->
 found() ->
     Response = hackney:get("http://localhost:3001/302"),
     ?assertMatch(302, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"0">>},
                   {<<"Location">>, <<"/hello/world">>}], headers(Response)),
     ?assertMatch(<<>>, body(Response)).
@@ -377,7 +377,7 @@ content_length() ->
     Response = hackney:get("http://localhost:3001/304"),
 
     ?assertMatch(304, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"7">>},
                   {<<"Etag">>, <<"foobar">>}], headers(Response)),
     ?assertMatch(<<>>, body(Response)).
@@ -387,7 +387,7 @@ user_content_length() ->
     Client  = start_slow_client(3001, "/user/content-length"),
     send(Client, Headers, 128),
     ?assertMatch({ok, <<"HTTP/1.1 200 OK\r\n"
-                        "Connection: Keep-Alive\r\n"
+                        "Connection: keep-alive\r\n"
                         "Content-Length: 123\r\n"
                         "\r\n"
                         "foobar">>},
@@ -406,7 +406,7 @@ chunked() ->
     Response = hackney:get("http://localhost:3001/chunked"),
 
     ?assertMatch(200, status(Response)),
-    ?assertEqual([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertEqual([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Type">>, <<"text/event-stream">>},
                   {<<"Transfer-Encoding">>, <<"chunked">>}], headers(Response)),
     ?assertMatch(Expected, body(Response)),
@@ -431,7 +431,7 @@ sendfile() ->
     {ok, Expected} = file:read_file(F),
 
     ?assertMatch(200, status(Response)),
-    ?assertEqual([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertEqual([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, ?I2B(size(Expected))}],
                  headers(Response)),
     ?assertEqual(Expected, body(Response)),
@@ -476,7 +476,7 @@ sendfile_range() ->
     file:close(Fd),
     Size = elli_util:file_size(F),
     ?assertMatch(206, status(Response)),
-    ?assertEqual([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertEqual([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"400">>},
                   {<<"Content-Range">>, iolist_to_binary(["bytes 300-699/", ?I2L(Size)])}],
                  headers(Response)),
@@ -491,7 +491,7 @@ slow_client() ->
     send(Client, Body, size(Body)),
 
     ?assertMatch({ok, <<"HTTP/1.1 200 OK\r\n"
-                        "Connection: Keep-Alive\r\n"
+                        "Connection: keep-alive\r\n"
                         "Content-Length: 15\r\n"
                         "\r\n"
                         "Hello undefined">>},
@@ -519,7 +519,7 @@ post_pipeline() ->
     gen_tcp:send(Socket, <<Req/binary, Req/binary>>),
 
     ExpectedResponse = <<"HTTP/1.1 200 OK\r\n"
-                         "Connection: Keep-Alive\r\n"
+                         "Connection: keep-alive\r\n"
                          "Content-Length: 22\r\n"
                          "\r\n"
                          "Hello elli of New York">>,
@@ -539,7 +539,7 @@ get_pipeline() ->
                                    [{active, false}, binary]),
     gen_tcp:send(Socket, <<Req/binary, Req/binary>>),
     ExpectedResponse = <<"HTTP/1.1 200 OK\r\n"
-                         "Connection: Keep-Alive\r\n"
+                         "Connection: keep-alive\r\n"
                          "Content-Length: 10\r\n"
                          "\r\n"
                          "Hello elli">>,
@@ -558,13 +558,13 @@ get_pipeline() ->
 head() ->
     Response = hackney:head("http://localhost:3001/head"),
     ?assertMatch(200, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"20">>}], headers(Response)).
 
 no_body() ->
     Response = hackney:get("http://localhost:3001/304"),
     ?assertMatch(304, status(Response)),
-    ?assertMatch([{<<"Connection">>, <<"Keep-Alive">>},
+    ?assertMatch([{<<"Connection">>, <<"keep-alive">>},
                   {<<"Content-Length">>, <<"7">>},
                   {<<"Etag">>, <<"foobar">>}], headers(Response)),
     ?assertMatch(<<>>, body(Response)).
@@ -588,7 +588,7 @@ sends_continue() ->
     % Send Result of the body
     gen_tcp:send(Socket, Body),
     ExpectedResponse = <<"HTTP/1.1 200 OK\r\n"
-                         "Connection: Keep-Alive\r\n"
+                         "Connection: keep-alive\r\n"
                          "Content-Length: 22\r\n"
                          "\r\n"
                          "Hello elli of New York">>,
